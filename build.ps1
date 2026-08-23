@@ -11,7 +11,7 @@ $destination = Join-Path $PSScriptRoot "$Output\$Runtime"
 dotnet publish $project `
     --configuration Release `
     --runtime $Runtime `
-    --self-contained true `
+    --self-contained false `
     --output $destination
 
 Write-Host "Published to $destination"

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.0
+
+- Switch the Windows release to a framework-dependent single-file build.
+- Reduce the x64 executable from about 108 MB to about 209 KB.
+- Require Microsoft .NET 9 Desktop Runtime instead of bundling the runtime.
+- Preserve all v1 widget, tray, taskbar, startup, notification, and quota-reading features.
+- Add detailed runtime, installation, privacy, and troubleshooting documentation.
+
 ## 1.0.1
 
 - Discover versioned Codex Desktop CLI directories on Windows.

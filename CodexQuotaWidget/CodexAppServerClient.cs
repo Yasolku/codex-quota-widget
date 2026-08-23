@@ -34,7 +34,7 @@ internal sealed class CodexAppServerClient
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(15));
 
-            await SendAsync(process, new { id = 1, method = "initialize", @params = new { clientInfo = new { name = "codex-quota-widget", title = "Codex Quota Widget", version = "1.0.0" } } });
+            await SendAsync(process, new { id = 1, method = "initialize", @params = new { clientInfo = new { name = "codex-quota-widget", title = "Codex Quota Widget", version = "2.0.0" } } });
             await ReadResponseAsync(process, 1, timeout.Token);
             await SendAsync(process, new { method = "initialized", @params = new { } });
             await SendAsync(process, new { id = 2, method = "account/rateLimits/read", @params = new { } });
