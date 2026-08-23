@@ -1,0 +1,21 @@
+# Build output
+**/bin/
+**/obj/
+dist/
+artifacts/
+*.zip
+*.pdb
+
+# Local SDK/cache used during development
+.tools/
+.dotnet-home/
+dotnet-install.ps1
+
+# IDE and user-specific files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Runtime settings never belong in the repository
+settings.json
