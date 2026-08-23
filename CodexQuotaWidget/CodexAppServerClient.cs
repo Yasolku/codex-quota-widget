@@ -14,6 +14,7 @@ internal sealed class CodexAppServerClient
             return QuotaSnapshot.Unavailable("未找到可启动的 Codex CLI。请先安装或登录 Codex。右键可使用演示模式。");
 
         Process? process = null;
+        Task<string>? stderrDrain = null;
         try
         {
             process = new Process
@@ -31,10 +32,11 @@ internal sealed class CodexAppServerClient
                 }
             };
             process.Start();
+            stderrDrain = process.StandardError.ReadToEndAsync();
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(15));
 
-            await SendAsync(process, new { id = 1, method = "initialize", @params = new { clientInfo = new { name = "codex-quota-widget", title = "Codex Quota Widget", version = "2.0.0" } } });
+            await SendAsync(process, new { id = 1, method = "initialize", @params = new { clientInfo = new { name = "codex-quota-widget", title = "Codex Quota Widget", version = "2.0.1" } } });
             await ReadResponseAsync(process, 1, timeout.Token);
             await SendAsync(process, new { method = "initialized", @params = new { } });
             await SendAsync(process, new { id = 2, method = "account/rateLimits/read", @params = new { } });
@@ -45,7 +47,15 @@ internal sealed class CodexAppServerClient
         catch (Exception ex) { return QuotaSnapshot.Unavailable($"读取失败：{ex.Message}"); }
         finally
         {
-            if (process is not null) { TryStop(process); process.Dispose(); }
+            if (process is not null)
+            {
+                TryStop(process);
+                if (stderrDrain is not null)
+                {
+                    try { await stderrDrain.WaitAsync(TimeSpan.FromSeconds(1)); } catch { }
+                }
+                process.Dispose();
+            }
         }
     }
 

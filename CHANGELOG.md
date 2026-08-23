@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1
+
+- Drain Codex child-process standard error to prevent pipe backpressure from causing refresh timeouts.
+- Save settings through a same-directory temporary file and atomic replacement.
+- Prevent settings write failures from crashing the widget, tray actions, or shutdown path.
+
 ## 2.0.0
 
 - Switch the Windows release to a framework-dependent single-file build.

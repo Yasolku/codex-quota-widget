@@ -29,7 +29,7 @@ v2 使用外置 .NET Desktop Runtime，Windows x64 发布包约 100 KB，运行�
 
 ## 安装
 
-1. 从 [Releases](../../releases) 下载 `CodexQuotaWidget-v2.0.0-framework-dependent-win-x64.zip`。
+1. 从 [Releases](../../releases) 下载最新的 `CodexQuotaWidget-v2.x.x-framework-dependent-win-x64.zip`。
 2. 对照同一 Release 中的 `SHA256SUMS.txt` 校验下载文件。
 3. 解压到固定目录，不要直接在 ZIP 内运行。
 4. 双击 `CodexQuotaWidget.exe`。
