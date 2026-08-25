@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.0
+
+- Make the 5-hour quota the primary large display, progress bar, tray icon, taskbar icon, and alert target.
+- Keep the weekly quota visible as a smaller secondary line with its own reset time.
+- Recognize explicit 300-minute and 10080-minute rate-limit windows.
+
 ## 2.0.1
 
 - Drain Codex child-process standard error to prevent pipe backpressure from causing refresh timeouts.

@@ -49,16 +49,19 @@ internal sealed class WidgetApplicationContext : ApplicationContext
         {
             snapshot = demo ? DemoSnapshot() : await client.ReadAsync(CancellationToken.None);
             form.UpdateSnapshot(snapshot, settings);
-            UpdateIcon(snapshot.Weekly?.RemainingPercent);
-            var pct = snapshot.Weekly?.RemainingPercent;
-            tray.Text = pct.HasValue ? $"Codex 每周剩余 {pct:0}% · {FormatReset(snapshot.Weekly?.ResetsAt)}" : "Codex 限额暂不可用";
+            UpdateIcon(snapshot.FiveHour?.RemainingPercent);
+            var pct = snapshot.FiveHour?.RemainingPercent;
+            var weeklyPct = snapshot.Weekly?.RemainingPercent;
+            tray.Text = pct.HasValue
+                ? $"Codex 5 小时 {pct:0}% · 每周 {(weeklyPct.HasValue ? $"{weeklyPct:0}%" : "--")}"
+                : "Codex 5 小时额度暂不可用";
             if (pct.HasValue && pct <= settings.LowQuotaThreshold)
             {
-                var cycle = snapshot.Weekly?.ResetsAt?.ToUnixTimeSeconds().ToString() ?? "unknown";
+                var cycle = snapshot.FiveHour?.ResetsAt?.ToUnixTimeSeconds().ToString() ?? "unknown";
                 if (notifiedCycle != cycle)
                 {
-                    tray.BalloonTipTitle = "Codex 每周额度偏低";
-                    tray.BalloonTipText = $"当前剩余 {pct:0}%，{FormatReset(snapshot.Weekly?.ResetsAt)}。";
+                    tray.BalloonTipTitle = "Codex 5 小时额度偏低";
+                    tray.BalloonTipText = $"当前剩余 {pct:0}%，{FormatReset(snapshot.FiveHour?.ResetsAt)}。";
                     tray.BalloonTipIcon = ToolTipIcon.Warning;
                     tray.ShowBalloonTip(6000);
                     notifiedCycle = cycle;
@@ -99,7 +102,7 @@ internal sealed class WidgetApplicationContext : ApplicationContext
             item.Click += (_, _) => { settings.OpacityPercent = value; ApplyAndSave(); BuildMenu(); };
             opacity.DropDownItems.Add(item);
         }
-        var threshold = new ToolStripMenuItem("低额度提醒");
+        var threshold = new ToolStripMenuItem("5 小时低额度提醒");
         foreach (var value in new[] { 10, 20, 30 })
         {
             var item = new ToolStripMenuItem($"低于 {value}%") { Checked = settings.LowQuotaThreshold == value };
@@ -144,7 +147,12 @@ internal sealed class WidgetApplicationContext : ApplicationContext
     }
 
     private static string FormatReset(DateTimeOffset? dt) => dt is null ? "重置时间未知" : $"{dt.Value.LocalDateTime:MM/dd HH:mm} 重置";
-    private static QuotaSnapshot DemoSnapshot() => new(new("weekly/10080", 45, DateTimeOffset.Now.AddDays(5).AddHours(8)), null, 1, [DateTimeOffset.Now.AddDays(29)], DateTimeOffset.Now);
+    private static QuotaSnapshot DemoSnapshot() => new(
+        new("weekly/10080", 45, DateTimeOffset.Now.AddDays(5).AddHours(8)),
+        new("five-hour/300", 72, DateTimeOffset.Now.AddHours(3).AddMinutes(18)),
+        1,
+        [DateTimeOffset.Now.AddDays(29)],
+        DateTimeOffset.Now);
 
     protected override void ExitThreadCore()
     {

@@ -5,7 +5,7 @@ namespace CodexQuotaWidget;
 internal static class StartupManager
 {
     private const string KeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string ValueName = "CodexQuotaWidget";
+    private const string ValueName = "CodexQuotaWidget5hWeekly";
 
     public static void Set(bool enabled)
     {

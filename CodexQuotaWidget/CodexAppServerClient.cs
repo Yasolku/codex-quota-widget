@@ -36,7 +36,7 @@ internal sealed class CodexAppServerClient
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(15));
 
-            await SendAsync(process, new { id = 1, method = "initialize", @params = new { clientInfo = new { name = "codex-quota-widget", title = "Codex Quota Widget", version = "2.0.1" } } });
+            await SendAsync(process, new { id = 1, method = "initialize", @params = new { clientInfo = new { name = "codex-quota-widget", title = "Codex Quota Widget", version = "3.0.0" } } });
             await ReadResponseAsync(process, 1, timeout.Token);
             await SendAsync(process, new { method = "initialized", @params = new { } });
             await SendAsync(process, new { id = 2, method = "account/rateLimits/read", @params = new { } });
@@ -85,15 +85,17 @@ internal sealed class CodexAppServerClient
         var result = root.TryGetProperty("result", out var r) ? r : root;
         var windows = new List<UsageWindow>();
         FindWindows(result, windows);
-        var weekly = windows.Where(w => w.Name.Contains("week", StringComparison.OrdinalIgnoreCase) || w.Name.Contains("10080"))
+        var weekly = windows.Where(w => w.Name.Contains("week", StringComparison.OrdinalIgnoreCase) || w.Name.Contains("/10080", StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(w => w.ResetsAt).FirstOrDefault();
-        weekly ??= windows.OrderByDescending(w => w.ResetsAt).FirstOrDefault();
-        var shortWindow = windows.Where(w => !ReferenceEquals(w, weekly)).OrderBy(w => w.ResetsAt).FirstOrDefault();
+        var fiveHour = windows.Where(w => w.Name.Contains("5h", StringComparison.OrdinalIgnoreCase)
+                || w.Name.Contains("5 hour", StringComparison.OrdinalIgnoreCase)
+                || w.Name.Contains("/300", StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(w => w.ResetsAt).FirstOrDefault();
         var expiries = new List<DateTimeOffset>();
         FindExpiryDates(result, expiries);
         var credits = FindCreditCount(result);
-        return new(weekly, shortWindow, credits, expiries.Distinct().Order().ToList(), DateTimeOffset.Now,
-            weekly is null ? "Codex 未返回可识别的每周限额。" : null);
+        return new(weekly, fiveHour, credits, expiries.Distinct().Order().ToList(), DateTimeOffset.Now,
+            weekly is null && fiveHour is null ? "Codex 未返回可识别的 5 小时或每周限额。" : null);
     }
 
     private static void FindWindows(JsonElement node, List<UsageWindow> output, string path = "")

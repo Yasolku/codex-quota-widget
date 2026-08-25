@@ -6,8 +6,9 @@ internal sealed class WidgetForm : Form
 {
     private readonly Label title = NewLabel("CODEX 限额", 11, FontStyle.Bold, Color.FromArgb(220, 225, 235));
     private readonly Label percent = NewLabel("--%", 20, FontStyle.Bold, Color.White);
-    private readonly Label weekly = NewLabel("每周限额读取中…", 10, FontStyle.Regular, Color.FromArgb(188, 194, 207));
+    private readonly Label fiveHour = NewLabel("5 小时限额读取中…", 10, FontStyle.Regular, Color.FromArgb(188, 194, 207));
     private readonly Label reset = NewLabel("", 9, FontStyle.Regular, Color.FromArgb(145, 153, 170));
+    private readonly Label weekly = NewLabel("每周限额读取中…", 9, FontStyle.Bold, Color.FromArgb(185, 191, 204));
     private readonly Label credit = NewLabel("完全重置：读取中…", 9, FontStyle.Regular, Color.FromArgb(185, 191, 204));
     private readonly Label status = NewLabel("正在连接 Codex", 8, FontStyle.Regular, Color.FromArgb(112, 122, 143));
     private readonly Panel progress = new() { BackColor = Color.FromArgb(57, 61, 73), Height = 7 };
@@ -25,25 +26,26 @@ internal sealed class WidgetForm : Form
         Text = "Codex 限额";
         FormBorderStyle = FormBorderStyle.None;
         BackColor = Color.FromArgb(28, 30, 38);
-        ClientSize = new Size(320, 205);
+        ClientSize = new Size(320, 225);
         MinimumSize = MaximumSize = Size;
         ShowInTaskbar = true;
         DoubleBuffered = true;
         Padding = new Padding(20);
         StartPosition = FormStartPosition.Manual;
 
-        Controls.AddRange([title, percent, weekly, reset, credit, status, progress, minimize, close]);
+        Controls.AddRange([title, percent, fiveHour, reset, weekly, credit, status, progress, minimize, close]);
         title.SetBounds(20, 18, 180, 24);
         minimize.SetBounds(250, 11, 28, 28);
         close.SetBounds(282, 11, 28, 28);
         percent.SetBounds(20, 51, 108, 45);
-        weekly.SetBounds(130, 56, 170, 22);
+        fiveHour.SetBounds(130, 56, 170, 22);
         reset.SetBounds(130, 80, 170, 20);
         progress.SetBounds(20, 108, 280, 7);
         progressValue.SetBounds(0, 0, 0, 7);
         progress.Controls.Add(progressValue);
-        credit.SetBounds(20, 130, 280, 25);
-        status.SetBounds(20, 169, 280, 18);
+        weekly.SetBounds(20, 128, 280, 22);
+        credit.SetBounds(20, 155, 280, 22);
+        status.SetBounds(20, 195, 280, 18);
 
         minimize.Click += (_, _) => HideRequested?.Invoke();
         close.Click += (_, _) => HideRequested?.Invoke();
@@ -54,13 +56,16 @@ internal sealed class WidgetForm : Form
 
     public void UpdateSnapshot(QuotaSnapshot snapshot, AppSettings settings)
     {
-        var pct = snapshot.Weekly?.RemainingPercent;
+        var pct = snapshot.FiveHour?.RemainingPercent;
         percent.Text = pct.HasValue ? $"{pct:0}%" : "--%";
         percent.ForeColor = QuotaColor(pct);
-        weekly.Text = snapshot.Weekly is null ? "每周使用限额" : $"每周剩余 {snapshot.Weekly.RemainingPercent:0}%";
-        reset.Text = snapshot.Weekly?.ResetsAt is { } dt ? $"重置：{dt.LocalDateTime:MM/dd HH:mm}" : "重置时间不可用";
+        fiveHour.Text = snapshot.FiveHour is null ? "5 小时使用限额" : $"5 小时剩余 {snapshot.FiveHour.RemainingPercent:0}%";
+        reset.Text = snapshot.FiveHour?.ResetsAt is { } dt ? $"重置：{dt.LocalDateTime:MM/dd HH:mm}" : "重置时间不可用";
         progressValue.Width = pct.HasValue ? (int)(progress.Width * pct.Value / 100) : 0;
         progressValue.BackColor = QuotaColor(pct);
+        weekly.Text = snapshot.Weekly is { } week
+            ? $"每周剩余 {week.RemainingPercent:0}% · {(week.ResetsAt is { } weeklyReset ? $"{weeklyReset.LocalDateTime:MM/dd HH:mm} 重置" : "重置时间未知")}"
+            : "每周额度不可用";
         var expiries = snapshot.ResetCreditExpiries.ToList();
         if (settings.ManualResetExpiry is { } manual && manual > DateTimeOffset.Now) expiries.Add(manual);
         var expiry = expiries.Where(x => x > DateTimeOffset.Now).Order().FirstOrDefault();
@@ -76,7 +81,7 @@ internal sealed class WidgetForm : Form
         TopMost = settings.AlwaysOnTop;
         ShowInTaskbar = settings.ShowInTaskbar;
         Opacity = Math.Clamp(settings.OpacityPercent / 100d, .5, 1);
-        var h = settings.Compact ? 155 : 205;
+        var h = settings.Compact ? 170 : 225;
         ClientSize = new Size(320, h);
         MinimumSize = MaximumSize = Size;
         credit.Visible = status.Visible = !settings.Compact;

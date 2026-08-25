@@ -6,7 +6,7 @@ internal sealed record UsageWindow(string Name, double RemainingPercent, DateTim
 
 internal sealed record QuotaSnapshot(
     UsageWindow? Weekly,
-    UsageWindow? Short,
+    UsageWindow? FiveHour,
     int ResetCredits,
     IReadOnlyList<DateTimeOffset> ResetCreditExpiries,
     DateTimeOffset UpdatedAt,
@@ -29,7 +29,7 @@ internal sealed class AppSettings
     public DateTimeOffset? ManualResetExpiry { get; set; }
 
     [JsonIgnore]
-    public static string DirectoryPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexQuotaWidget");
+    public static string DirectoryPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexQuotaWidget5hWeekly");
     [JsonIgnore]
     public static string FilePath => Path.Combine(DirectoryPath, "settings.json");
 }
