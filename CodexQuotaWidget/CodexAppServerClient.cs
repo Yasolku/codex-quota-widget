@@ -36,7 +36,7 @@ internal sealed class CodexAppServerClient
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(15));
 
-            await SendAsync(process, new { id = 1, method = "initialize", @params = new { clientInfo = new { name = "codex-quota-widget", title = "Codex Quota Widget", version = "3.0.0" } } });
+            await SendAsync(process, new { id = 1, method = "initialize", @params = new { clientInfo = new { name = "codex-quota-widget", title = "Codex Quota Widget", version = "3.0.1" } } });
             await ReadResponseAsync(process, 1, timeout.Token);
             await SendAsync(process, new { method = "initialized", @params = new { } });
             await SendAsync(process, new { id = 2, method = "account/rateLimits/read", @params = new { } });
@@ -110,7 +110,7 @@ internal sealed class CodexAppServerClient
                 var key = p.Name.ToLowerInvariant();
                 if (key.Contains("used") && key.Contains("percent") && p.Value.TryGetDouble(out var u)) used = u;
                 if (key.Contains("remaining") && key.Contains("percent") && p.Value.TryGetDouble(out var rem)) remaining = rem;
-                if ((key.Contains("window") && key.Contains("minute")) && p.Value.TryGetDouble(out var min)) minutes = min;
+                if (key.Contains("window") && (key.Contains("minute") || key.Contains("mins")) && p.Value.TryGetDouble(out var min)) minutes = min;
                 if (key.Contains("reset") && TryDate(p.Value, out var dt)) reset = dt;
                 if ((key is "name" or "label" or "limit_name") && p.Value.ValueKind == JsonValueKind.String) name += "/" + p.Value.GetString();
             }

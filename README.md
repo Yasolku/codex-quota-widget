@@ -30,7 +30,7 @@
 
 ## 安装
 
-1. 构建或下载 `CodexQuotaWidget-v3.0.0-framework-dependent-win-x64.zip`。
+1. 构建或下载最新的 `CodexQuotaWidget-v3.x.x-framework-dependent-win-x64.zip`。
 2. 对照同一 Release 中的 `SHA256SUMS.txt` 校验下载文件。
 3. 解压到固定目录，不要直接在 ZIP 内运行。
 4. 双击 `CodexQuotaWidget.exe`。

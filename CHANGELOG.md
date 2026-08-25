@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.1
+
+- Recognize the current Codex `windowDurationMins` field in addition to `windowDurationMinutes`.
+- Restore detection of the 300-minute and 10080-minute quota windows after the app-server schema abbreviation.
+
 ## 3.0.0
 
 - Make the 5-hour quota the primary large display, progress bar, tray icon, taskbar icon, and alert target.
