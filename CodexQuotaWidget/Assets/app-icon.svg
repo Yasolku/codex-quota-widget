@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs><clipPath id="water"><circle cx="124" cy="124" r="77"/></clipPath></defs>
+  <rect x="12" y="12" width="232" height="232" rx="58" fill="#f3f7ff"/>
+  <circle cx="124" cy="124" r="77" fill="#e5efff"/>
+  <path d="M40 126 C70 106 96 148 126 128 S180 108 210 130 V210 H40Z" fill="#8ebaff" clip-path="url(#water)"/>
+  <path d="M40 146 C72 125 101 161 130 143 S179 129 210 149 V210 H40Z" fill="#4285ed" clip-path="url(#water)"/>
+  <circle cx="124" cy="124" r="77" fill="none" stroke="#2456a6" stroke-width="12"/>
+  <path d="M176 176 L204 204" fill="none" stroke="#2456a6" stroke-width="16" stroke-linecap="round"/>
+</svg>

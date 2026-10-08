@@ -19,3 +19,11 @@ dotnet-install.ps1
 
 # Runtime settings never belong in the repository
 settings.json
+settings.*.tmp
+auth.json
+*.log
+.codex/
+.dotnet-cli-temp/
+ui-preview*/
+perf-ui*.json
+CodexQuotaWidget/Assets/app-icon-preview.png

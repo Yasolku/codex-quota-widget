@@ -14,7 +14,7 @@ internal sealed class CodexAppServerClient
             return QuotaSnapshot.Unavailable("未找到可启动的 Codex CLI。请先安装或登录 Codex。右键可使用演示模式。");
 
         Process? process = null;
-        Task<string>? stderrDrain = null;
+        Task? stderrDrain = null;
         try
         {
             process = new Process
@@ -32,12 +32,12 @@ internal sealed class CodexAppServerClient
                 }
             };
             process.Start();
-            stderrDrain = process.StandardError.ReadToEndAsync();
+            stderrDrain = DrainErrorAsync(process.StandardError);
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(15));
 
-            await SendAsync(process, new { id = 1, method = "initialize", @params = new { clientInfo = new { name = "codex-quota-widget", title = "Codex Quota Widget", version = "3.0.1" } } });
-            await ReadResponseAsync(process, 1, timeout.Token);
+            await SendAsync(process, new { id = 1, method = "initialize", @params = new { clientInfo = new { name = "codex-quota-widget", title = "Codex Quota Widget", version = "3.5.1" } } });
+            using var initialized = await ReadResponseAsync(process, 1, timeout.Token);
             await SendAsync(process, new { method = "initialized", @params = new { } });
             await SendAsync(process, new { id = 2, method = "account/rateLimits/read", @params = new { } });
             using var response = await ReadResponseAsync(process, 2, timeout.Token);
@@ -57,6 +57,12 @@ internal sealed class CodexAppServerClient
                 process.Dispose();
             }
         }
+    }
+
+    private static async Task DrainErrorAsync(StreamReader reader)
+    {
+        var buffer = new char[2048];
+        while (await reader.ReadAsync(buffer.AsMemory()) > 0) { }
     }
 
     private static async Task SendAsync(Process process, object payload)
@@ -84,7 +90,14 @@ internal sealed class CodexAppServerClient
         if (root.TryGetProperty("error", out var error)) return QuotaSnapshot.Unavailable(error.ToString());
         var result = root.TryGetProperty("result", out var r) ? r : root;
         var windows = new List<UsageWindow>();
-        FindWindows(result, windows);
+        // The account response can include unrelated per-model limits. Prefer the
+        // account's main Codex bucket instead of selecting a later reset from one of them.
+        var mainLimits = result;
+        if (result.TryGetProperty("rateLimits", out var main) && main.ValueKind == JsonValueKind.Object) mainLimits = main;
+        else if (result.TryGetProperty("rateLimitsByLimitId", out var buckets) && buckets.ValueKind == JsonValueKind.Object
+            && buckets.TryGetProperty("codex", out var codex) && codex.ValueKind == JsonValueKind.Object) mainLimits = codex;
+        FindWindows(mainLimits, windows);
+        var planType = mainLimits.TryGetProperty("planType", out var plan) && plan.ValueKind == JsonValueKind.String ? plan.GetString() : null;
         var weekly = windows.Where(w => w.Name.Contains("week", StringComparison.OrdinalIgnoreCase) || w.Name.Contains("/10080", StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(w => w.ResetsAt).FirstOrDefault();
         var fiveHour = windows.Where(w => w.Name.Contains("5h", StringComparison.OrdinalIgnoreCase)
@@ -95,7 +108,7 @@ internal sealed class CodexAppServerClient
         FindExpiryDates(result, expiries);
         var credits = FindCreditCount(result);
         return new(weekly, fiveHour, credits, expiries.Distinct().Order().ToList(), DateTimeOffset.Now,
-            weekly is null && fiveHour is null ? "Codex 未返回可识别的 5 小时或每周限额。" : null);
+            weekly is null && fiveHour is null ? "Codex 未返回可识别的 5 小时或每周限额。" : null, planType);
     }
 
     private static void FindWindows(JsonElement node, List<UsageWindow> output, string path = "")

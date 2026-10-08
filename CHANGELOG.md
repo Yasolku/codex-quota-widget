@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.5.1
+
+- Add an original water-level Q application icon with nine resolutions (16–256 px); keep dynamic quota numbers in the tray and taskbar.
+- Introduce a minimalist water-level floating ball; click to expand and click CODEX to collapse. Ball and panel sizes can be adjusted independently.
+- Add light/dark themes, configurable time-based switching, smooth transitions and an independent water-wave switch.
+- Detect Pro (including prolite), hide its 5-hour row, and retain Auto/Plus/Pro manual display options.
+- Allow the main quota on the left or right, with a larger next-reset date and time alongside it.
+- Keep the last successful quota on transient connection failures and clearly mark stale data.
+- Cache drawing resources, use adaptive animation timing, stop animations when static/hidden, and replace periodic wake polling with an event wait.
+- Cancel pending reads at shutdown, discard child stderr without accumulating it, and dispose initialization responses.
+- Add synthetic UI regression and performance diagnostics; no real account samples or runtime settings are included.
+- Make build.ps1 fail correctly when compilation fails.
+
 ## 3.0.1
 
 - Recognize the current Codex `windowDurationMins` field in addition to `windowDurationMinutes`.

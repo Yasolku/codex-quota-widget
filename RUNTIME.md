@@ -1,6 +1,6 @@
 # Runtime requirement
 
-Codex Quota Widget v2 requires **Microsoft .NET 9 Desktop Runtime**.
+Codex Quota Widget v3.5.1 requires **Microsoft .NET 9 Desktop Runtime**.
 
 - Operating system: Windows 10 or Windows 11
 - Architecture: x64 for the `win-x64` Release asset

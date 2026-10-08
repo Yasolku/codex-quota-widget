@@ -8,6 +8,7 @@
     <AssemblyName>CodexQuotaWidget</AssemblyName>
     <RootNamespace>CodexQuotaWidget</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -16,6 +17,6 @@
     <DebugSymbols>false</DebugSymbols>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <Version>3.0.1</Version>
+    <Version>3.5.1</Version>
   </PropertyGroup>
 </Project>
